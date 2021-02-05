@@ -15,6 +15,8 @@ const MOMO_MTN = 'MTN';
 const MOMO_VODAFONE = 'VOD';
 const MOMO_AIRTELTIGO = 'AIR';
 
+const META_PURPOSE_DEPOSIT = 'deposit';
+
 String payMethod = CARD_PAY_METHOD;
 String selectedMomo = MOMO_MTN;
 

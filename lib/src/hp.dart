@@ -3,13 +3,27 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:harbor_pay/hp_io.dart';
 
+class SendMoney {
+  SendMoney({
+    this.amount,
+    this.clientId,
+    this.clientKey,
+    this.currency,
+  });
+
+  String clientId;
+  String clientKey;
+  String currency;
+  double amount;
+}
+
 class HPay {
   HPay(
       {this.amount,
       this.clientId,
       this.clientKey,
       this.currency,
-      this.meta,
+      this.purpose,
       this.reference,
       this.transactionType,
       this.customerNumber,
@@ -21,7 +35,7 @@ class HPay {
   String currency;
   double amount;
   String reference; //If not passed, a random string will be generated
-  String meta; //useful when topping up a HarborPay wallet
+  String purpose; //useful when topping up a HarborPay wallet
   String transactionType; //momo or card
   String transactionPlatform; //AIR, MTN or VOD;
   String customerNumber;
@@ -47,7 +61,7 @@ class HPay {
     this.currency = options.currency;
     this.reference =
         options.reference.isEmpty ? this.genId() : options.reference;
-    this.meta = options.meta.isEmpty ? '{}' : options.meta;
+    this.purpose = options.purpose.isEmpty ? '{}' : options.purpose;
   }
 
   appendToInitializer(options) {
@@ -60,7 +74,26 @@ class HPay {
     if (options.customerName != null) this.customerName = options.customerName;
     if (options.currency) this.currency = options.currency;
     if (options.amount) this.amount = options.amount;
-    if (options.meta) this.meta = options.meta;
+    if (options.purpose) this.purpose = options.purpose;
+  }
+
+  processTransfer(context) async {
+    if (this.amount <= 0) {
+      return {
+        'success': false,
+        'message': 'amount should be more than zero',
+      };
+    }
+
+    var finalLoad = {
+      "client_id": this.clientId,
+      "customer_number": this.customerNumber,
+      "customer_name": this.customerName,
+      "currency": this.currency,
+      "amount": this.amount,
+    };
+
+    return await doPost('send_money', finalLoad, headers: headers());
   }
 
   prepareTransaction(context) async {
@@ -86,15 +119,12 @@ class HPay {
       "customer_name": this.customerName,
       "currency": this.currency,
       "amount": this.amount,
-      "meta": this.meta,
+      "meta": {'purpose': this.purpose, 'client': this.clientId},
     };
 
     if (this.transactionPlatform != null) {
       finalLoad['transactionPlatform'] = this.transactionPlatform;
     }
-
-    print('FINAL_LOAD_DON\'T_SEND');
-    print(finalLoad);
 
     var x = await doPost('api', finalLoad, headers: headers());
 
@@ -124,10 +154,89 @@ class HPay {
     return {'success': false, 'message': 'Payment Failed. Timed out'};
   }
 
-  Future processPayment(context) async {
+  Future sendMoney(
+      {BuildContext context,
+      double amount,
+      String customerName,
+      String customerNumber}) async {
+    this.amount = amount;
+    this.customerNumber = customerNumber;
+    this.customerName = customerName;
+
+    showModalBottomSheet(
+        backgroundColor: Colors.transparent,
+        context: context,
+        builder: (_) {
+          return Container(
+            height: 130,
+            padding: EdgeInsets.all(10.0),
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(30.0),
+                  topRight: Radius.circular(30.0),
+                )),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child:
+                          appText('Send Money', 15, FontWeight.bold),
+                    )
+                  ],
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: appText(
+                            'Transferring ${this.currency}$amount to $customerNumber...',
+                            15,
+                            FontWeight.normal,
+                            align: TextAlign.center),
+                      ),
+                    )
+                  ],
+                ),
+                SizedBox(height: 10),
+                Center(
+                  child: progress(size: 20),
+                )
+              ],
+            ),
+          );
+        });
+
+    Map sndMnResponse = await this.processTransfer(context);
+
+    print(sndMnResponse);
+
+    if (!sndMnResponse['success']) {
+      Navigator.pop(context);
+      return sndMnResponse;
+    } else {
+      Navigator.pop(context);
+      return sndMnResponse;
+    }
+
+  }
+
+  Future processPayment(
+      {BuildContext context,
+      double amount,
+      String customerName,
+      String customerNumber, String purpose = ''}) async {
+    if (amount != null) this.amount = amount;
+    if (customerNumber != null) this.customerNumber = customerNumber;
+    if (customerName != null) this.customerName = customerName;
+    if (purpose != null) this.purpose = purpose;
+
     int currentStep = 0;
     bool complete = false;
-    this.transactionType = CARD_PAY_METHOD;
     double height = 220;
 
     return await showModalBottomSheet(
@@ -198,18 +307,18 @@ class HPay {
                                             borderRadius:
                                                 BorderRadius.circular(50)),
                                       ),
-                                      SizedBox(width: 10),
-                                      FlatButton(
-                                        onPressed: () {},
-                                        color:
-                                            this.buttonColors.withOpacity(0.4),
-                                        child: appText(
-                                            'Debit Card', 15, FontWeight.w600,
-                                            col: Colors.white),
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(50)),
-                                      )
+//                                      SizedBox(width: 10),
+//                                      FlatButton(
+//                                        onPressed: () {},
+//                                        color:
+//                                            this.buttonColors.withOpacity(0.4),
+//                                        child: appText(
+//                                            'Debit Card', 15, FontWeight.w600,
+//                                            col: Colors.white),
+//                                        shape: RoundedRectangleBorder(
+//                                            borderRadius:
+//                                                BorderRadius.circular(50)),
+//                                      )
                                     ],
                                   ),
                                   SizedBox(height: 40),
@@ -219,7 +328,7 @@ class HPay {
                           ),
                           Step(
                             isActive: currentStep == 1,
-                            title: Text('Platform'),
+                            title: Text('Provider'),
                             content: Container(
                               height: 300,
                               child: ListView(
@@ -419,265 +528,6 @@ class HPay {
                         },
                       )));
         });
-  }
-
-  Future showPaymentOptions(context) async {
-    showModalBottomSheet(
-        backgroundColor: Colors.transparent,
-        context: context,
-        builder: (_) {
-          return Container(
-              height: MOMO_SHEET_HEIGHT,
-              padding: EdgeInsets.all(20.0),
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30.0),
-                    topRight: Radius.circular(30.0),
-                  )),
-              child: Column(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(5.0),
-                      child: appText(
-                          'Choose a payment method.', 15, FontWeight.w600,
-                          align: TextAlign.center),
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      RaisedButton(
-                        onPressed: () async {
-                          return await showMomo(context);
-                        },
-                        color: this.buttonColors,
-                        child: appText('Mobile Money', 15, FontWeight.w600,
-                            col: Colors.white),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(50)),
-                      ),
-                      SizedBox(width: 10),
-                      FlatButton(
-                        onPressed: () {},
-                        color: this.buttonColors.withOpacity(0.4),
-                        child: appText('Debit Card', 15, FontWeight.w600,
-                            col: Colors.white),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(50)),
-                      )
-                    ],
-                  ),
-                  SizedBox(height: 40),
-                ],
-              ));
-        });
-  }
-
-  Future showMomo(context) async {
-    Navigator.pop(context);
-    this.transactionType = CARD_PAY_METHOD;
-    return await showModalBottomSheet(
-        backgroundColor: Colors.transparent,
-        clipBehavior: Clip.hardEdge,
-        context: context,
-        builder: (_) {
-          return StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) => Container(
-                height: 250,
-                padding: EdgeInsets.all(20.0),
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(30.0),
-                      topRight: Radius.circular(30.0),
-                    )),
-                child: ListView(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        appText('Payment for:', 12, FontWeight.normal),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: appText(
-                              '${this.currency}${this.amount.toString()}',
-                              30,
-                              FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        appText('Select mobile money platform:', 12,
-                            FontWeight.normal),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          margin: verticalPadding(10),
-                          width: appWidth(context) * 0.6,
-                          decoration: BoxDecoration(
-                            color: appLightGray.withOpacity(0.5),
-                            borderRadius: BorderRadius.circular(40),
-                          ),
-                          child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 10),
-                            child: DropdownButton(
-                                isExpanded: true,
-                                underline: Container(),
-                                items: [
-                                  DropdownMenuItem(
-                                    child: Row(
-                                      children: [
-                                        CircleAvatar(
-                                          radius: 15,
-                                          backgroundImage: AssetImage(
-                                              'assets/airteltigo.jpg',
-                                              package: 'harbor_pay'),
-                                        ),
-                                        SizedBox(
-                                          width: 10,
-                                        ),
-                                        appText(
-                                            'AirtelTigo', 15, FontWeight.w600),
-                                      ],
-                                    ),
-                                    value: 'AIR',
-                                  ),
-                                  DropdownMenuItem(
-                                    child: Row(
-                                      children: [
-                                        CircleAvatar(
-                                          radius: 15,
-                                          backgroundImage: AssetImage(
-                                              'assets/mtn.png',
-                                              package: 'harbor_pay'),
-                                        ),
-                                        SizedBox(
-                                          width: 10,
-                                        ),
-                                        appText('MTN', 15, FontWeight.w600),
-                                      ],
-                                    ),
-                                    value: 'MTN',
-                                  ),
-                                  DropdownMenuItem(
-                                    child: Row(
-                                      children: [
-                                        CircleAvatar(
-                                          radius: 15,
-                                          backgroundImage: AssetImage(
-                                              'assets/vodafone.jpg',
-                                              package: 'harbor_pay'),
-                                        ),
-                                        SizedBox(
-                                          width: 10,
-                                        ),
-                                        appText(
-                                            'Vodafone', 15, FontWeight.w600),
-                                      ],
-                                    ),
-                                    value: 'VOD',
-                                  )
-                                ],
-                                value: selectedMomo,
-                                onChanged: (val) {
-                                  setState(() {
-                                    this.transactionType = MOMO_PAY_METHOD;
-                                    this.transactionPlatform = val;
-                                    selectedMomo = val;
-                                  });
-                                }),
-                          ),
-                        )
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        RaisedButton(
-                          onPressed: () async {
-                            return await showProgress(context);
-                          },
-                          color: this.buttonColors,
-                          child: appText('Make Payment', 15, FontWeight.w600,
-                              col: Colors.white),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(50)),
-                        ),
-                      ],
-                    ),
-                  ],
-                )),
-          );
-        });
-  }
-
-  Future showProgress(context) async {
-    Navigator.pop(context);
-    showModalBottomSheet(
-        backgroundColor: Colors.transparent,
-        clipBehavior: Clip.hardEdge,
-        context: context,
-        builder: (_) {
-          return StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) =>
-                  Container(
-                    height: 210,
-                    padding: EdgeInsets.all(20.0),
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(30.0),
-                          topRight: Radius.circular(30.0),
-                        )),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: appText(
-                                  'Mobile Money Payment', 15, FontWeight.bold),
-                            )
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: appText(
-                                    'Confirm the mobile money prompt (if any). Please check your approvals if nothing happens soon.',
-                                    15,
-                                    FontWeight.normal,
-                                    align: TextAlign.center),
-                              ),
-                            )
-                          ],
-                        ),
-                        SizedBox(height: 20),
-                        Center(
-                          child: progress(size: 30),
-                        )
-                      ],
-                    ),
-                  ));
-        });
-
-    return await this.prepareTransaction(context);
   }
 
   headers() {

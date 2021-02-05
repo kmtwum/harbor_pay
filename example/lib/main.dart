@@ -6,7 +6,6 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -22,6 +21,7 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
+
   final String title;
 
   @override
@@ -29,20 +29,22 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
 
-  void proceed() async {
-    HPay hp = new HPay(
-      clientId: '1234',
-      clientKey: '456789765435678',
-      currency: 'GHS',
-      amount: 1.00,
-      customerNumber: '0000000000',
-      buttonColors: Colors.black
-    );
+  HPay hp = new HPay(
+    clientId: 'f07b73',//'1234',
+    clientKey: 'HP5fde2e83206a8866075314', //'456789765435678',
+    currency: 'GHS',
+    buttonColors: Colors.black,
+  );
 
-    var k = await hp.processPayment(context);
-    print('FROM APP:' + k.toString());
+  void doProcessPayment() async {
+    var paymentResponse = await hp.processPayment(context: context, amount: 1.00, customerNumber: '0000000000');
+    print(paymentResponse.toString());
+  }
+
+  void doSendMoney() async {
+    var sendMoneyResponse = await hp.sendMoney(context: context, amount: 1.00, customerNumber: '0554457884');
+    print(sendMoneyResponse.toString());
   }
 
   @override
@@ -55,17 +57,41 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
-              'Tap the FAB to begin',
+            SizedBox(
+              width: 200,
+              child: FlatButton(
+                  color: ThemeData.light().primaryColor,
+                  onPressed: doSendMoney,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Send Money',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      Icon(Icons.call_made, color: Colors.white),
+                    ],
+                  )),
             ),
+            SizedBox(
+              width: 200,
+              child: FlatButton(
+                  color: ThemeData.light().primaryColor,
+                  onPressed: doProcessPayment,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Request Money',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      Icon(Icons.call_received, color: Colors.white),
+                    ],
+                  )),
+            )
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: proceed,
-        tooltip: 'Test',
-        child: Icon(Icons.arrow_forward),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

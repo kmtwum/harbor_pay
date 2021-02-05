@@ -4,7 +4,7 @@ A Flutter package to accept payments with HarborPay.
 
 ## Getting Started
 You will need an account on HarborPay to accept payments if you don't already have one.  
-[Create one here](https://pay.harborstores.com/register) to get your `clientId` and `clientKey`.
+[Create one here](https://pay.harborstores.com/register), and get your `clientId` and `clientKey` from the preferences screen.
 
 First, add the `harbor_pay` package to your pubspec dependencies.
 
@@ -14,26 +14,45 @@ First, add the `harbor_pay` package to your pubspec dependencies.
 import 'package:harbor_pay/harbor_pay.dart';
 ```
 
-### Initialise HarborPay
+### Create a HarborPay object
 
 ```
 HPay hp = new HPay(
   clientId: '123456',
   clientKey: '456789765435678',
   currency: 'GHS',
-  amount: 1.00,
-  customerNumber: '2330000000',
   buttonColors: Colors.black
 );
 ```
 
 ### Process Payment
+```
+var paymentResponse = await hp.processPayment(context: context, amount: 1.00, customerNumber: '2330000000');  
+print(paymentResponse.toString()); 
+
+// Optional but useful parameter: customerName
+```
+
+### Make A Deposit / Top-Up
+
+Requires passing a `purpose` parameter as `deposit` in the `processPayment()` method.
+```
+var paymentResponse = await hp.processPayment(context: context, amount: 1.00, customerNumber: '2330000000', purpose: 'deposit');  
+print(paymentResponse.toString()); 
+
+// Optional but useful parameter: customerName
+```
+
+### Send Money
 
 ```
-var paymentResponse = await hp.processPayment(context);
+var paymentResponse = await hp.sendMoney(context: context, amount: 1.00, customerNumber: '2330000000');  
+print(paymentResponse.toString()); 
+
+// Optional but useful parameter: customerName
 ```
 
-From the above, `paymentResponse` will be in JSON as described below:
+`paymentResponse` from the calls, will contain the following  in JSON response:
 
 ```json
 {
@@ -41,5 +60,4 @@ From the above, `paymentResponse` will be in JSON as described below:
   "message": ""
 }
 ```
-
-A `success` value of `true` means the payment has actually been processed successfully and no further action has to bbe taken.
+A `success` value of `true` means the payment has actually been processed successfully and no further action has to be taken.
