@@ -45,11 +45,28 @@ print(paymentResponse.toString());
 
 ### Send Money
 
+#### Option 1 (*Suitable for single recipients*)
+
 ```
 var paymentResponse = await hp.sendMoney(context: context, amount: 1.00, customerNumber: '2330000000');  
 print(paymentResponse.toString()); 
 
 // Optional but useful parameter: customerName
+
+```
+#### Option 2
+
+```
+void doSendMoneyToMultiple() async {
+    List<MoneyRecipient> clients = [
+      new MoneyRecipient(customerNumber: '2330000000', amount: 1.00),
+      new MoneyRecipient(customerNumber: '2330000001', amount: 2.00),
+      // Optional but useful parameter: customerName
+    ] ;
+    var sendMoneyResponse = await hp.sendMoney(context: context, recipients: clients);
+    print(sendMoneyResponse.toString());
+  } 
+
 ```
 
 `paymentResponse` from the calls, will contain the following  in JSON response:

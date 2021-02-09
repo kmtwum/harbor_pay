@@ -3,18 +3,32 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:harbor_pay/hp_io.dart';
 
-class SendMoney {
-  SendMoney({
+class MoneyRecipient {
+  MoneyRecipient({
     this.amount,
-    this.clientId,
-    this.clientKey,
-    this.currency,
+    this.customerNumber,
+    this.customerName,
   });
 
-  String clientId;
-  String clientKey;
-  String currency;
   double amount;
+  String customerNumber;
+  String customerName;
+
+  factory MoneyRecipient.fromRawJson(String str) => MoneyRecipient.fromJson(json.decode(str));
+
+  String toRawJson() => json.encode(toJson());
+
+  factory MoneyRecipient.fromJson(Map<String, dynamic> json) => MoneyRecipient(
+    amount: json["amount"] == null ? null : json["amount"].toDouble(),
+    customerNumber: json["customer_number"] == null ? null : json["customer_number"],
+    customerName: json["customer_name"] == null ? null : json["customer_name"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "amount": amount == null ? null : amount,
+    "customer_number": customerNumber == null ? null : customerNumber,
+    "customer_name": customerName == null ? null : customerName,
+  };
 }
 
 class HPay {
@@ -40,6 +54,7 @@ class HPay {
   String transactionPlatform; //AIR, MTN or VOD;
   String customerNumber;
   String customerName;
+  List<MoneyRecipient> recipients;
 
   Color buttonColors;
 
@@ -78,11 +93,21 @@ class HPay {
   }
 
   processTransfer(context) async {
-    if (this.amount <= 0) {
-      return {
-        'success': false,
-        'message': 'amount should be more than zero',
-      };
+
+    if (this.recipients.length == 0) {
+      if (this.amount <= 0) {
+        return {
+          'success': false,
+          'message': 'amount should be more than 0.00',
+        };
+      }
+    } else {
+      if (this.recipients.any((MoneyRecipient element) => element.amount <= 0)) {
+        return {
+          'success': false,
+          'message': 'amount should be more than 0.00',
+        };
+      }
     }
 
     var finalLoad = {
@@ -91,9 +116,11 @@ class HPay {
       "customer_name": this.customerName,
       "currency": this.currency,
       "amount": this.amount,
+      "recipients": jsonEncode(this.recipients)
     };
 
-    return await doPost('send_money', finalLoad, headers: headers());
+    var x =  await doPost('send_money', finalLoad, headers: headers());
+    return x;
   }
 
   prepareTransaction(context) async {
@@ -140,7 +167,6 @@ class HPay {
     for (int i = 0; i < 5; i++) {
       await Future.delayed(Duration(seconds: 6));
       var dec = await doGet('verify/$transId', headers: headers());
-      print('Status now:' + dec.toString());
       if (dec['transactionStatus'] == 'Completed') {
         return {'success': true, 'message': 'Payment Received. Thank you'};
       } else if (dec['transactionStatus'] == 'Failed') {
@@ -150,7 +176,6 @@ class HPay {
         };
       }
     }
-    print('OK');
     return {'success': false, 'message': 'Payment Failed. Timed out'};
   }
 
@@ -158,10 +183,19 @@ class HPay {
       {BuildContext context,
       double amount,
       String customerName,
-      String customerNumber}) async {
-    this.amount = amount;
-    this.customerNumber = customerNumber;
-    this.customerName = customerName;
+      String customerNumber, List<MoneyRecipient> recipients = const []}) async {
+
+    if (recipients.length > 0) {
+      this.recipients = recipients;
+      this.amount = 0;
+      this.customerNumber = "";
+      this.customerName = "";
+    } else {
+      this.recipients = [];
+      this.amount = amount;
+      this.customerNumber = customerNumber;
+      this.customerName = customerName;
+    }
 
     showModalBottomSheet(
         backgroundColor: Colors.transparent,
@@ -193,8 +227,12 @@ class HPay {
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.all(10.0),
-                        child: appText(
+                        child: this.recipients.length == 0 ? appText(
                             'Transferring ${this.currency}$amount to $customerNumber...',
+                            15,
+                            FontWeight.normal,
+                            align: TextAlign.center) : appText(
+                            'Transferring money to recipient(s)...',
                             15,
                             FontWeight.normal,
                             align: TextAlign.center),
@@ -212,8 +250,6 @@ class HPay {
         });
 
     Map sndMnResponse = await this.processTransfer(context);
-
-    print(sndMnResponse);
 
     if (!sndMnResponse['success']) {
       Navigator.pop(context);

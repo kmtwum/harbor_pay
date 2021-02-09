@@ -31,8 +31,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
 
   HPay hp = new HPay(
-    clientId: 'f07b73',//'1234',
-    clientKey: 'HP5fde2e83206a8866075314', //'456789765435678',
+    clientId: '1234',
+    clientKey: '456789765435678',
     currency: 'GHS',
     buttonColors: Colors.black,
   );
@@ -44,6 +44,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void doSendMoney() async {
     var sendMoneyResponse = await hp.sendMoney(context: context, amount: 1.00, customerNumber: '0554457884');
+    print(sendMoneyResponse.toString());
+  }
+
+  void doSendMoneyToMultiple() async {
+    List<MoneyRecipient> clients = [
+      new MoneyRecipient(customerNumber: '0554457884', amount: 1.00),
+      new MoneyRecipient(customerNumber: '0554457884', amount: 2.00),
+    ] ;
+    var sendMoneyResponse = await hp.sendMoney(context: context, recipients: clients);
     print(sendMoneyResponse.toString());
   }
 
@@ -61,7 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
               width: 200,
               child: FlatButton(
                   color: ThemeData.light().primaryColor,
-                  onPressed: doSendMoney,
+                  onPressed: doSendMoneyToMultiple,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

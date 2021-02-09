@@ -54,7 +54,7 @@ Map stripNulls(Map m) {
   return finMap;
 }
 
-appText(String word, double z, FontWeight w, {Color col = appDarkText, TextAlign align = TextAlign.left, int maxLines = 5, int shadow = 0}) {
+Widget appText(String word, double z, FontWeight w, {Color col = appDarkText, TextAlign align = TextAlign.left, int maxLines = 5, int shadow = 0}) {
   return Text(
     word,
     softWrap: true,
@@ -87,7 +87,7 @@ Widget progress({double size = 30}) {
   );
 }
 
-appWidth(con) {
+double appWidth(con) {
   return MediaQuery.of(con).size.width;
 }
 
