@@ -1,3 +1,6 @@
+## [0.0.4] - 2021-02-12
+- Added option to withdraw money from your HarborPay account to a mobile wallet.
+
 ## [0.0.3] - 2021-02-09
 - Added option to send money to multiple recipients from your HarborPay account.
 

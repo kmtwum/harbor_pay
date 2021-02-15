@@ -38,20 +38,25 @@ class _MyHomePageState extends State<MyHomePage> {
   );
 
   void doProcessPayment() async {
-    var paymentResponse = await hp.processPayment(context: context, amount: 1.00, customerNumber: '0000000000');
+    var paymentResponse = await hp.processPayment(context: context, amount: 1.00, customerNumber: '2330000000');
     print(paymentResponse.toString());
   }
 
   void doSendMoney() async {
-    var sendMoneyResponse = await hp.sendMoney(context: context, amount: 1.00, customerNumber: '0554457884');
+    var sendMoneyResponse = await hp.sendMoney(context: context, amount: 1.00, customerNumber: '2330000000');
     print(sendMoneyResponse.toString());
+  }
+
+  void doWithdraw() async {
+    var withdrawMoneyResponse = await hp.withdraw(context: context, amount: 1.00, customerNumber: '2330000000');
+    print(withdrawMoneyResponse.toString());
   }
 
   void doSendMoneyToMultiple() async {
     List<MoneyRecipient> clients = [
-      new MoneyRecipient(customerNumber: '0554457884', amount: 1.00),
-      new MoneyRecipient(customerNumber: '0554457884', amount: 2.00),
-    ] ;
+      new MoneyRecipient(customerNumber: '2330000000', amount: 1.00),
+      new MoneyRecipient(customerNumber: '2330000001', amount: 2.00),
+    ];
     var sendMoneyResponse = await hp.sendMoney(context: context, recipients: clients);
     print(sendMoneyResponse.toString());
   }
@@ -95,6 +100,22 @@ class _MyHomePageState extends State<MyHomePage> {
                         style: TextStyle(color: Colors.white),
                       ),
                       Icon(Icons.call_received, color: Colors.white),
+                    ],
+                  )),
+            ),
+            SizedBox(
+              width: 200,
+              child: FlatButton(
+                  color: ThemeData.light().primaryColor,
+                  onPressed: doWithdraw,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Withdraw Money',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      Icon(Icons.call_made, color: Colors.white),
                     ],
                   )),
             )

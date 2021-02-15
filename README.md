@@ -10,13 +10,13 @@ First, add the `harbor_pay` package to your pubspec dependencies.
 
 ### Import HarborPay
 
-```
+```dart
 import 'package:harbor_pay/harbor_pay.dart';
 ```
 
 ### Create a HarborPay object
 
-```
+```dart
 HPay hp = new HPay(
   clientId: '123456',
   clientKey: '456789765435678',
@@ -26,7 +26,7 @@ HPay hp = new HPay(
 ```
 
 ### Process Payment
-```
+```dart
 var paymentResponse = await hp.processPayment(context: context, amount: 1.00, customerNumber: '2330000000');  
 print(paymentResponse.toString()); 
 
@@ -36,7 +36,7 @@ print(paymentResponse.toString());
 ### Make A Deposit / Top-Up
 
 Requires passing a `purpose` parameter as `deposit` in the `processPayment()` method.
-```
+```dart
 var paymentResponse = await hp.processPayment(context: context, amount: 1.00, customerNumber: '2330000000', purpose: 'deposit');  
 print(paymentResponse.toString()); 
 
@@ -47,7 +47,7 @@ print(paymentResponse.toString());
 
 #### Option 1 (*Suitable for single recipients*)
 
-```
+```dart
 var paymentResponse = await hp.sendMoney(context: context, amount: 1.00, customerNumber: '2330000000');  
 print(paymentResponse.toString()); 
 
@@ -56,7 +56,7 @@ print(paymentResponse.toString());
 ```
 #### Option 2
 
-```
+```dart
 void doSendMoneyToMultiple() async {
     List<MoneyRecipient> clients = [
       new MoneyRecipient(customerNumber: '2330000000', amount: 1.00),
@@ -67,6 +67,14 @@ void doSendMoneyToMultiple() async {
     print(sendMoneyResponse.toString());
   } 
 
+```
+### Make A Withdrawal
+
+```dart
+var withdrawMoneyResponse = await hp.withdraw(context: context, amount: 2.00, customerNumber: '2330000000');
+print(withdrawMoneyResponse.toString());
+
+// Optional but useful parameter: customerName
 ```
 
 `paymentResponse` from the calls, will contain the following  in JSON response:
