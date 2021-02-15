@@ -257,13 +257,8 @@ class HPay {
 
     Map sndMnResponse = await this.processTransfer(context);
 
-    if (!sndMnResponse['success']) {
-      Navigator.pop(context);
-      return sndMnResponse;
-    } else {
-      Navigator.pop(context);
-      return sndMnResponse;
-    }
+    Navigator.pop(context);
+    return sndMnResponse;
   }
 
   Future processPayment({BuildContext context, double amount, String customerName, String customerNumber, String purpose = ''}) async {

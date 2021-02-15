@@ -1,3 +1,6 @@
+## [0.0.5] - 2021-02-15
+- Fixed mobile provider selection issues.
+
 ## [0.0.4] - 2021-02-12
 - Added option to withdraw money from your HarborPay account to a mobile wallet.
 

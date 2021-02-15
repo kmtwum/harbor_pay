@@ -29,7 +29,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   HPay hp = new HPay(
     clientId: '1234',
     clientKey: '456789765435678',
