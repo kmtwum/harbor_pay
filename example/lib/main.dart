@@ -41,6 +41,11 @@ class _MyHomePageState extends State<MyHomePage> {
     print(paymentResponse.toString());
   }
 
+  void doDeposit() async {
+    var paymentResponse = await hp.processPayment(context: context, amount: 1.00, customerNumber: '2330000000', purpose: 'deposit');
+    print(paymentResponse.toString());
+  }
+
   void doSendMoney() async {
     var sendMoneyResponse = await hp.sendMoney(context: context, amount: 1.00, customerNumber: '2330000000');
     print(sendMoneyResponse.toString());
@@ -72,8 +77,8 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             SizedBox(
               width: 200,
-              child: FlatButton(
-                  color: ThemeData.light().primaryColor,
+              child: TextButton(
+                  style: ButtonStyle(backgroundColor: MaterialStateProperty.all(ThemeData.light().primaryColor)),
                   onPressed: doSendMoneyToMultiple,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -88,8 +93,8 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             SizedBox(
               width: 200,
-              child: FlatButton(
-                  color: ThemeData.light().primaryColor,
+              child: TextButton(
+                  style: ButtonStyle(backgroundColor: MaterialStateProperty.all(ThemeData.light().primaryColor)),
                   onPressed: doProcessPayment,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -104,14 +109,30 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             SizedBox(
               width: 200,
-              child: FlatButton(
-                  color: ThemeData.light().primaryColor,
+              child: TextButton(
+                  style: ButtonStyle(backgroundColor: MaterialStateProperty.all(ThemeData.light().primaryColor)),
                   onPressed: doWithdraw,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         'Withdraw Money',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      Icon(Icons.call_made, color: Colors.white),
+                    ],
+                  )),
+            ),
+            SizedBox(
+              width: 200,
+              child: TextButton(
+                  style: ButtonStyle(backgroundColor: MaterialStateProperty.all(ThemeData.light().primaryColor)),
+                  onPressed: doDeposit,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Deposit Money',
                         style: TextStyle(color: Colors.white),
                       ),
                       Icon(Icons.call_made, color: Colors.white),

@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-const base = "https://pay.harborstores.com";
+const base = "app.myharborpay.com";
 const appLightGray = Color(0xFFE7ECF2);
 const appGray = Color(0xFFadb4b9);
 const appDarkText = Color(0xFF2F2F2F);
@@ -23,13 +23,15 @@ String selectedMomo = MOMO_MTN;
 
 doPost(String urlAfterBase, Map bod, {Map headers}) async {
   var body = stripNulls(bod);
-  var js = await http.post("$base/$urlAfterBase", body: jsonEncode(body), headers: headers);
+  var uri = Uri.https(base, '/$urlAfterBase');
+  var js = await http.post(uri, body: jsonEncode(body), headers: headers);
   var decoded = jsonDecode(js.body);
   return decoded;
 }
 
-doGet(String urlAfterBase, {Map headers}) async {
-  var js = await http.get('$base/$urlAfterBase', headers: headers);
+doGet(String urlAfterBase, {Map queries, Map headers}) async {
+  var uri = Uri.https(base, '/$urlAfterBase', queries);
+  var js = await http.get(uri, headers: headers);
   var decoded;
   try {
     decoded = jsonDecode(js.body);
@@ -95,6 +97,12 @@ InputDecoration textDecor(
     fillColor: Colors.white,
     contentPadding: EdgeInsets.fromLTRB(20.0, 12.0, 20.0, 12.0),
   );
+}
+
+ButtonStyle bStyle(Color color, {double radius: 0}) {
+  return ButtonStyle(
+      backgroundColor: MaterialStateProperty.all(color),
+      shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius))));
 }
 
 List<BoxShadow> elevation(Color col, int elevation) {

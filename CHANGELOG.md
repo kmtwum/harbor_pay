@@ -1,3 +1,6 @@
+## [0.0.6] - 2021-03-19
+- Added PayPal to the payment methods.
+
 ## [0.0.5] - 2021-02-15
 - Fixed mobile provider selection issues.
 

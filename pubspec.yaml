@@ -1,6 +1,6 @@
 name: harbor_pay
 description: A Flutter package to accept mobile / card payments with HarborPay.
-version: 0.0.5
+version: 0.0.6
 homepage: https://github.com/kmtwum/harbor_pay
 
 environment:
@@ -10,7 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  http: ^0.12.2
+  http: ^0.13.0
+  webview_flutter: ^2.0.2
 
 dev_dependencies:
   flutter_test:
