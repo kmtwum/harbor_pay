@@ -213,7 +213,7 @@ class HPay {
       finalLoad['meta'] = {'purpose': this.purpose, 'client': this.clientId};
     }
 
-    print(finalLoad.toString());
+//    print(finalLoad.toString());
 
     var x = await doPost('api', finalLoad, headers: headers());
 
@@ -263,7 +263,6 @@ class HPay {
     }
 
     showModalBottomSheetCustom(
-//        backgroundColor: Colors.transparent,
         context: context,
         builder: (_) {
           return Container(
@@ -533,7 +532,7 @@ class HPay {
                                           onPressed: () {
                                             setState(() {
                                               currentStep = 2;
-                                              height = 240;
+                                              height = 300;
                                               this.prepareTransaction(context);
                                             });
                                           },
@@ -587,14 +586,14 @@ class HPay {
                                         ElevatedButton(
                                           onPressed: () async {
                                             setState(() {
-                                              height = 300;
+                                              height = 310;
                                               paymentInitiated = true;
                                             });
                                             Map response = await prepareTransaction(context);
-                                            wvURI = response['message'];
                                             if (!response['success']) {
-                                              Navigator.pop(context);
+                                              Navigator.pop(context, response);
                                             } else {
+                                              wvURI = response['message'];
                                               setState(() {
                                                 height = appHeight(context) * 0.90;
                                                 currentStep = 2;
@@ -607,8 +606,8 @@ class HPay {
                                         ),
                                       ],
                                     ),
-                                    SizedBox(height: 20),
-                                    paymentInitiated ? Center(child: progress(size: 30)) : Container(),
+                                    SizedBox(height: 10),
+                                    paymentInitiated ? Center(child: progress(size: 25)) : Container(),
                                   ],
                                 ),
                         ),
@@ -672,17 +671,9 @@ class HPay {
                                               },
                                               navigationDelegate: (NavigationRequest request) {
                                                 if (request.url.startsWith('https://app.myharborpay.com/pcap')) {
-                                                  print(request.url);
                                                   paymentCaptured(context);
                                                 }
-                                                print('allowing navigation to $request');
                                                 return NavigationDecision.navigate;
-                                              },
-                                              onPageStarted: (String url) {
-                                                print('Page started loading: $url');
-                                              },
-                                              onPageFinished: (String url) {
-                                                print('Page finished loading: $url');
                                               },
                                               gestureRecognizers: [
                                                 Factory(() => PlatformViewVerticalGestureRecognizer()),

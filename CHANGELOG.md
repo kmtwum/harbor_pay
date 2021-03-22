@@ -1,3 +1,6 @@
+## [0.0.7] - 2021-03-22
+- Corrected layout issue with PayPal.
+
 ## [0.0.6] - 2021-03-19
 - Added PayPal to the payment methods.
 
