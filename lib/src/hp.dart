@@ -5,15 +5,14 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:harbor_pay/bsheet.dart';
 import 'package:harbor_pay/hp_io.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class MoneyRecipient {
   MoneyRecipient({
-    this.amount,
-    this.customerNumber,
-    this.customerName,
+    this.amount = 0,
+    this.customerNumber = '',
+    this.customerName = '',
   });
 
   double amount;
@@ -31,14 +30,14 @@ class MoneyRecipient {
       );
 
   Map<String, dynamic> toJson() => {
-        "amount": amount == null ? null : amount,
-        "customer_number": customerNumber == null ? null : customerNumber,
-        "customer_name": customerName == null ? null : customerName,
+        "amount": amount,
+        "customer_number": customerNumber,
+        "customer_name": customerName,
       };
 }
 
 class PlatformViewVerticalGestureRecognizer extends VerticalDragGestureRecognizer {
-  PlatformViewVerticalGestureRecognizer({PointerDeviceKind kind}) : super(kind: kind);
+  PlatformViewVerticalGestureRecognizer({PointerDeviceKind? kind}) : super(kind: kind);
 
   Offset _dragDistance = Offset.zero;
 
@@ -75,33 +74,30 @@ class PlatformViewVerticalGestureRecognizer extends VerticalDragGestureRecognize
 
 class HPay {
   HPay(
-      {this.amount,
-      this.clientId,
-      this.clientKey,
-      this.currency,
-      this.purpose,
-      this.reference,
-      this.transactionType,
-      this.customerNumber,
-      this.customerName,
+      {required this.clientId,
+      required this.clientKey,
+      required this.currency,
+      this.purpose = '',
+      this.source = '',
+      this.reference = '',
+      this.transactionType = '',
+      this.customerNumber = '',
+      this.customerName = '',
       this.buttonColors = const Color(0xFF24b4c4)});
 
   String clientId;
   String clientKey;
   String currency;
-  double amount;
+  double amount = 0;
   String reference; //If not passed, a random string will be generated
   String purpose; //useful when topping up a HarborPay wallet
+  String source; //useful to tell which platform payment came from
   String transactionType; //momo or card
-  String transactionPlatform; //AIR, MTN or VOD;
+  String transactionPlatform = 'MTN'; //AIR, MTN or VOD;
   String customerNumber;
   String customerName;
-  List<MoneyRecipient> recipients;
-
+  List<MoneyRecipient> recipients = [];
   Color buttonColors;
-
-  bool allowMomo;
-  bool allowCard;
 
   genId({int count = 8}) {
     var r = Random();
@@ -169,7 +165,7 @@ class HPay {
     var finalLoad = {
       "client_id": this.clientId,
       "account_type": MOMO_PAY_METHOD,
-      "account_platform": this.transactionPlatform ?? MOMO_MTN,
+      "account_platform": this.transactionPlatform,
       "account_number": this.customerNumber,
       "account_name": this.customerName,
       "currency": this.currency,
@@ -180,7 +176,7 @@ class HPay {
     Navigator.pop(context, x);
   }
 
-  prepareTransaction(context) async {
+  prepareTransaction(context, {Map extra: const {}}) async {
     if (!['momo', 'card', 'paypal'].contains(this.transactionType)) {
       return {
         'success': false,
@@ -196,22 +192,27 @@ class HPay {
 
     var finalLoad = {
       "client_id": this.clientId,
-      "client_reference": this.reference ?? genId(count: 10),
+      "client_reference": this.reference != '' ? this.reference : genId(count: 10),
       "transaction_type": this.transactionType,
       "customer_number": this.customerNumber,
       "customer_name": this.customerName,
       "currency": this.currency,
       "amount": this.amount,
+      "source": this.source
     };
 
-    if (selectedMomo != null) {
+    if (selectedMomo != '') {
       this.transactionPlatform = selectedMomo;
       finalLoad['transaction_platform'] = this.transactionPlatform;
     }
 
-    if (this.purpose.isNotEmpty) {
-      finalLoad['meta'] = {'purpose': this.purpose, 'client': this.clientId};
+    if (this.purpose != '') {
+      if (['deposit', 'top_up'].indexOf(this.purpose) > 0) {
+        finalLoad['meta'] = {'purpose': this.purpose, 'client': this.clientId};
+      }
     }
+
+    if (extra.length > 0) finalLoad['meta'] = extra;
 
 //    print(finalLoad.toString());
 
@@ -248,21 +249,12 @@ class HPay {
     }
   }
 
-  Future sendMoney(
-      {BuildContext context, double amount, String customerName, String customerNumber, List<MoneyRecipient> recipients = const []}) async {
-    if (recipients.length > 0) {
-      this.recipients = recipients;
-      this.amount = 0;
-      this.customerNumber = "";
-      this.customerName = "";
-    } else {
-      this.recipients = [];
-      this.amount = amount;
-      this.customerNumber = customerNumber;
-      this.customerName = customerName;
-    }
+  Future sendMoney({required BuildContext context, List<MoneyRecipient> recipients = const []}) async {
+    this.recipients = recipients;
+    this.customerNumber = "";
+    this.customerName = "";
 
-    showModalBottomSheetCustom(
+    showModalBottomSheet(
         context: context,
         builder: (_) {
           return Container(
@@ -313,10 +305,16 @@ class HPay {
     return sndMnResponse;
   }
 
-  Future processPayment({BuildContext context, double amount, String customerName, String customerNumber, String purpose = ''}) async {
-    if (amount != null) this.amount = amount;
-    if (customerNumber != null) this.customerNumber = customerNumber;
-    if (customerName != null) this.customerName = customerName;
+  Future processPayment(
+      {required BuildContext context,
+      required double amount,
+      String? customerName,
+      required String customerNumber,
+      String? purpose,
+      Map extra = const {}}) async {
+    if (amount != 0) this.amount = amount;
+    if (customerNumber != '') this.customerNumber = customerNumber;
+    if (customerName != '') this.customerName = customerName!;
     if (purpose != null) this.purpose = purpose;
     final Completer<WebViewController> _controller = Completer<WebViewController>();
 
@@ -325,7 +323,8 @@ class HPay {
     bool paymentInitiated = false;
     var wvURI = '';
 
-    return await showModalBottomSheetCustom(
+    return await showModalBottomSheet(
+        isScrollControlled: true,
         context: context,
         builder: (_) {
           return StatefulBuilder(
@@ -371,6 +370,7 @@ class HPay {
                                           onPressed: () {
                                             setState(() {
                                               this.transactionType = 'momo';
+                                              selectedMomo = MOMO_MTN;
                                               height = 350;
                                               currentStep = 1;
                                             });
@@ -383,38 +383,40 @@ class HPay {
                                                 size: 18,
                                               ),
                                               SizedBox(
-                                                width: 10,
+                                                width: 5,
                                               ),
                                               appText('Mobile Money', 15, FontWeight.w600, col: Colors.white),
                                             ],
                                           ),
                                         )
                                       : Container(),
-                                  SizedBox(width: 10),
-                                  TextButton(
-                                    style: bStyle(this.buttonColors, radius: 50),
-                                    onPressed: () {
-                                      setState(() {
-                                        this.transactionType = 'paypal';
-                                        selectedMomo = null;
-                                        height = 250;
-                                        currentStep = 1;
-                                      });
-                                    },
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          Icons.credit_card,
-                                          color: Colors.white,
-                                          size: 18,
-                                        ),
-                                        SizedBox(
-                                          width: 10,
-                                        ),
-                                        appText('PayPal / Card', 15, FontWeight.w600, col: Colors.white),
-                                      ],
-                                    ),
-                                  )
+                                  this.currency == 'USD' ? SizedBox(width: 5) : Container(),
+                                  this.currency == 'USD'
+                                      ? TextButton(
+                                          style: bStyle(this.buttonColors, radius: 50),
+                                          onPressed: () {
+                                            setState(() {
+                                              this.transactionType = 'paypal';
+                                              selectedMomo = '';
+                                              height = 250;
+                                              currentStep = 1;
+                                            });
+                                          },
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.credit_card,
+                                                color: Colors.white,
+                                                size: 18,
+                                              ),
+                                              SizedBox(
+                                                width: 10,
+                                              ),
+                                              appText('PayPal/Card', 15, FontWeight.w600, col: Colors.white),
+                                            ],
+                                          ),
+                                        )
+                                      : Container()
                                 ],
                               ),
                               SizedBox(height: 40),
@@ -517,8 +519,8 @@ class HPay {
                                                 onChanged: (val) {
                                                   setState(() {
                                                     this.transactionType = MOMO_PAY_METHOD;
-                                                    this.transactionPlatform = val;
-                                                    selectedMomo = val;
+                                                    this.transactionPlatform = val.toString();
+                                                    selectedMomo = val.toString();
                                                   });
                                                 }),
                                           ),
@@ -533,7 +535,7 @@ class HPay {
                                             setState(() {
                                               currentStep = 2;
                                               height = 300;
-                                              this.prepareTransaction(context);
+                                              this.prepareTransaction(context, extra: extra);
                                             });
                                           },
                                           style: bStyle(this.buttonColors, radius: 50),
@@ -589,7 +591,7 @@ class HPay {
                                               height = 310;
                                               paymentInitiated = true;
                                             });
-                                            Map response = await prepareTransaction(context);
+                                            Map response = await prepareTransaction(context, extra: extra);
                                             if (!response['success']) {
                                               Navigator.pop(context, response);
                                             } else {
@@ -597,7 +599,6 @@ class HPay {
                                               setState(() {
                                                 height = appHeight(context) * 0.90;
                                                 currentStep = 2;
-//                                              this.prepareTransaction(context);
                                               });
                                             }
                                           },
@@ -687,19 +688,20 @@ class HPay {
                         ),
                       ),
                     ],
-                    controlsBuilder: (BuildContext context, {VoidCallback onStepContinue, VoidCallback onStepCancel}) {
+                    controlsBuilder: (BuildContext context, {VoidCallback? onStepContinue, VoidCallback? onStepCancel}) {
                       return Container();
                     },
                   )));
         });
   }
 
-  Future withdraw({BuildContext context, double amount, String customerName, String customerNumber}) async {
-    if (amount != null) this.amount = amount;
-    if (customerNumber != null) this.customerNumber = customerNumber;
+  Future withdraw({required BuildContext context, required double amount, String? customerName, required String customerNumber}) async {
+    if (amount != 0) this.amount = amount;
+    if (customerNumber != '') this.customerNumber = customerNumber;
     if (customerName != null) this.customerName = customerName;
     TextEditingController _mobController = new TextEditingController();
 
+    selectedMomo = MOMO_MTN;
     int currentStep = 0;
     double height = appHeight(context) * 0.8;
     _mobController.text = this.customerNumber;
@@ -836,8 +838,8 @@ class HPay {
                                           onChanged: (val) {
                                             setState(() {
                                               this.transactionType = MOMO_PAY_METHOD;
-                                              this.transactionPlatform = val;
-                                              selectedMomo = val;
+                                              this.transactionPlatform = val.toString();
+                                              selectedMomo = val.toString();
                                             });
                                           }),
                                     ),
@@ -901,7 +903,7 @@ class HPay {
                         ),
                       ),
                     ],
-                    controlsBuilder: (BuildContext context, {VoidCallback onStepContinue, VoidCallback onStepCancel}) {
+                    controlsBuilder: (BuildContext context, {VoidCallback? onStepContinue, VoidCallback? onStepCancel}) {
                       return Container();
                     },
                   )));

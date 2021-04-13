@@ -4,7 +4,7 @@ A Flutter package to accept payments with HarborPay.
 
 ## Getting Started
 You will need an account on HarborPay to accept payments if you don't already have one.  
-[Create one here](https://pay.harborstores.com/register), and get your `clientId` and `clientKey` from the preferences screen.
+[Create one here](https://app.myharborpay.com/register), and get your `clientId` and `clientKey` from the preferences screen.
 
 First, add the `harbor_pay` package to your pubspec dependencies.
 
@@ -21,7 +21,8 @@ HPay hp = new HPay(
   clientId: '123456',
   clientKey: '456789765435678',
   currency: 'GHS',
-  buttonColors: Colors.black
+  buttonColors: Colors.black,
+  source: 'MyFancyApp',
 );
 ```
 
@@ -31,6 +32,8 @@ var paymentResponse = await hp.processPayment(context: context, amount: 1.00, cu
 print(paymentResponse.toString()); 
 
 // Optional but useful parameter: customerName
+// Optional but useful parameter: Map<String, dynamic> extra
+// Available values: 'payment_source', ''
 ```
 
 ### Make A Deposit / Top-Up
@@ -41,20 +44,11 @@ var paymentResponse = await hp.processPayment(context: context, amount: 1.00, cu
 print(paymentResponse.toString()); 
 
 // Optional but useful parameter: customerName
+// Optional but useful parameter: Map<String, dynamic> extra
+// Available values: 'payment_source', ''
 ```
 
 ### Send Money
-
-#### Option 1 (*Suitable for single recipients*)
-
-```dart
-var paymentResponse = await hp.sendMoney(context: context, amount: 1.00, customerNumber: '2330000000');  
-print(paymentResponse.toString()); 
-
-// Optional but useful parameter: customerName
-
-```
-#### Option 2
 
 ```dart
 void doSendMoneyToMultiple() async {

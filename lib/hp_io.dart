@@ -21,7 +21,7 @@ const META_PURPOSE_DEPOSIT = 'deposit';
 String payMethod = CARD_PAY_METHOD;
 String selectedMomo = MOMO_MTN;
 
-doPost(String urlAfterBase, Map bod, {Map headers}) async {
+doPost(String urlAfterBase, Map bod, {Map<String, String>? headers}) async {
   var body = stripNulls(bod);
   var uri = Uri.https(base, '/$urlAfterBase');
   var js = await http.post(uri, body: jsonEncode(body), headers: headers);
@@ -29,7 +29,7 @@ doPost(String urlAfterBase, Map bod, {Map headers}) async {
   return decoded;
 }
 
-doGet(String urlAfterBase, {Map queries, Map headers}) async {
+doGet(String urlAfterBase, {Map<String, dynamic>? queries, Map<String, String>? headers}) async {
   var uri = Uri.https(base, '/$urlAfterBase', queries);
   var js = await http.get(uri, headers: headers);
   var decoded;
@@ -77,7 +77,13 @@ Widget appText(String word, double z, FontWeight w,
 }
 
 InputDecoration textDecor(
-    {String hint, Icon prefixIcon, Widget suffix, String prefix = '', bool enabled = true, double hintSize = 16, bool showBorder = true}) {
+    {String? hint,
+    Icon? prefixIcon,
+    Widget? suffix,
+    String prefix = '',
+    bool enabled = true,
+    double hintSize = 16,
+    bool showBorder = true}) {
   return new InputDecoration(
     prefixIcon: prefixIcon,
     prefixText: prefix,

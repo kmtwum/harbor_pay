@@ -1,3 +1,7 @@
+## [0.0.8] - 2021-04-13
+- Migrated to null safety.
+- Added source to initializer.
+
 ## [0.0.7] - 2021-03-22
 - Corrected layout issue with PayPal.
 

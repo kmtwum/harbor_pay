@@ -30,10 +30,11 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   HPay hp = new HPay(
-    clientId: '1234',
+    clientId: '123456',
     clientKey: '456789765435678',
     currency: 'GHS',
     buttonColors: Colors.black,
+    source: 'MyFancyApp',
   );
 
   void doProcessPayment() async {
@@ -46,17 +47,12 @@ class _MyHomePageState extends State<MyHomePage> {
     print(paymentResponse.toString());
   }
 
-  void doSendMoney() async {
-    var sendMoneyResponse = await hp.sendMoney(context: context, amount: 1.00, customerNumber: '2330000000');
-    print(sendMoneyResponse.toString());
-  }
-
   void doWithdraw() async {
     var withdrawMoneyResponse = await hp.withdraw(context: context, amount: 1.00, customerNumber: '2330000000');
     print(withdrawMoneyResponse.toString());
   }
 
-  void doSendMoneyToMultiple() async {
+  void sendMoney() async {
     List<MoneyRecipient> clients = [
       new MoneyRecipient(customerNumber: '2330000000', amount: 1.00),
       new MoneyRecipient(customerNumber: '2330000001', amount: 2.00),
@@ -79,7 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
               width: 200,
               child: TextButton(
                   style: ButtonStyle(backgroundColor: MaterialStateProperty.all(ThemeData.light().primaryColor)),
-                  onPressed: doSendMoneyToMultiple,
+                  onPressed: sendMoney,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
