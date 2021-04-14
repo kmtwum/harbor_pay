@@ -1,3 +1,6 @@
+## [0.0.9] - 2021-04-14
+- Relaxed customerName requirement for processing payments
+
 ## [0.0.8] - 2021-04-13
 - Migrated to null safety.
 - Added source to initializer.

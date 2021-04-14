@@ -314,7 +314,7 @@ class HPay {
       Map extra = const {}}) async {
     if (amount != 0) this.amount = amount;
     if (customerNumber != '') this.customerNumber = customerNumber;
-    if (customerName != '') this.customerName = customerName!;
+    if (customerName != null) this.customerName = customerName;
     if (purpose != null) this.purpose = purpose;
     final Completer<WebViewController> _controller = Completer<WebViewController>();
 
