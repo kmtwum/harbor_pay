@@ -30,35 +30,14 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   HPay hp = new HPay(
-    clientId: '123456',
-    clientKey: '456789765435678',
-    currency: 'GHS',
+    clientKey: 'xxx',
     buttonColors: Colors.black,
-    source: 'MyFancyApp',
+    bottomSheetBackgroundColor: Colors.yellow
   );
 
   void doProcessPayment() async {
-    var paymentResponse = await hp.processPayment(context: context, amount: 1.00, customerNumber: '2330000000');
+    var paymentResponse = await hp.processPayment(context: context, amount: 14.00, customerNumber: '2330000000', extra: {'order_id': 'STRF3C77575'});
     print(paymentResponse.toString());
-  }
-
-  void doDeposit() async {
-    var paymentResponse = await hp.processPayment(context: context, amount: 1.00, customerNumber: '2330000000', purpose: 'deposit');
-    print(paymentResponse.toString());
-  }
-
-  void doWithdraw() async {
-    var withdrawMoneyResponse = await hp.withdraw(context: context, amount: 1.00, customerNumber: '2330000000');
-    print(withdrawMoneyResponse.toString());
-  }
-
-  void sendMoney() async {
-    List<MoneyRecipient> clients = [
-      new MoneyRecipient(customerNumber: '2330000000', amount: 1.00),
-      new MoneyRecipient(customerNumber: '2330000001', amount: 2.00),
-    ];
-    var sendMoneyResponse = await hp.sendMoney(context: context, recipients: clients);
-    print(sendMoneyResponse.toString());
   }
 
   @override
@@ -75,22 +54,6 @@ class _MyHomePageState extends State<MyHomePage> {
               width: 200,
               child: TextButton(
                   style: ButtonStyle(backgroundColor: MaterialStateProperty.all(ThemeData.light().primaryColor)),
-                  onPressed: sendMoney,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Send Money',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      Icon(Icons.call_made, color: Colors.white),
-                    ],
-                  )),
-            ),
-            SizedBox(
-              width: 200,
-              child: TextButton(
-                  style: ButtonStyle(backgroundColor: MaterialStateProperty.all(ThemeData.light().primaryColor)),
                   onPressed: doProcessPayment,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -103,38 +66,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     ],
                   )),
             ),
-            SizedBox(
-              width: 200,
-              child: TextButton(
-                  style: ButtonStyle(backgroundColor: MaterialStateProperty.all(ThemeData.light().primaryColor)),
-                  onPressed: doWithdraw,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Withdraw Money',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      Icon(Icons.call_made, color: Colors.white),
-                    ],
-                  )),
-            ),
-            SizedBox(
-              width: 200,
-              child: TextButton(
-                  style: ButtonStyle(backgroundColor: MaterialStateProperty.all(ThemeData.light().primaryColor)),
-                  onPressed: doDeposit,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Deposit Money',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      Icon(Icons.call_made, color: Colors.white),
-                    ],
-                  )),
-            )
           ],
         ),
       ),

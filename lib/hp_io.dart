@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-const base = "app.myharborpay.com";
+const base = "kampusbuy.com";
 const appLightGray = Color(0xFFE7ECF2);
 const appGray = Color(0xFFadb4b9);
 const appDarkText = Color(0xFF2F2F2F);
@@ -23,7 +23,7 @@ String selectedMomo = MOMO_MTN;
 
 doPost(String urlAfterBase, Map bod, {Map<String, String>? headers}) async {
   var body = stripNulls(bod);
-  var uri = Uri.https(base, '/$urlAfterBase');
+  var uri = Uri.https(base, '/$urlAfterBase/');
   var js = await http.post(uri, body: jsonEncode(body), headers: headers);
   var decoded = jsonDecode(js.body);
   return decoded;
