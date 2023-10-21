@@ -77,6 +77,7 @@ class HPay {
       {required this.clientId,
       required this.clientKey,
       required this.currency,
+      required this.callback,
       this.purpose = '',
       this.source = '',
       this.reference = '',
@@ -92,6 +93,7 @@ class HPay {
   String reference; //If not passed, a random string will be generated
   String purpose; //useful when topping up a HarborPay wallet
   String source; //useful to tell which platform payment came from
+  String callback; //where to receive status updates
   String transactionType; //momo or card
   String transactionPlatform = 'MTN'; //AIR, MTN or VOD;
   String customerNumber;
@@ -191,19 +193,20 @@ class HPay {
     }
 
     var finalLoad = {
-      "client_id": this.clientId,
-      "client_reference": this.reference != '' ? this.reference : genId(count: 10),
+      "client": this.clientId,
+      "reference": this.reference != '' ? this.reference : genId(count: 10),
       "transaction_type": this.transactionType,
       "customer_number": this.customerNumber,
-      "customer_name": this.customerName,
       "currency": this.currency,
       "amount": this.amount,
-      "source": this.source
+      "source": this.source,
+      "purpose": this.purpose,
+      "callback": this.callback
     };
 
     if (selectedMomo != '') {
       this.transactionPlatform = selectedMomo;
-      finalLoad['transaction_platform'] = this.transactionPlatform;
+      finalLoad['network_type'] = this.transactionPlatform;
     }
 
     if (this.purpose != '') {
@@ -216,12 +219,12 @@ class HPay {
 
 //    print(finalLoad.toString());
 
-    var x = await doPost('api', finalLoad, headers: headers());
+    var x = await doPost('forward', finalLoad, headers: headers());
 
     if (this.transactionType == 'paypal') return x;
 
-    if (x['success']) {
-      var responseMap = await queryTransStatus(finalLoad['client_reference']);
+    if (x['resp_code'] == '015') {
+      var responseMap = await queryTransStatus(finalLoad['reference']);
       Navigator.pop(context, responseMap);
     } else {
       Navigator.pop(context, x);
@@ -231,7 +234,7 @@ class HPay {
   Future<Map<String, dynamic>> queryTransStatus(transId) async {
     for (int i = 0; i < 5; i++) {
       await Future.delayed(Duration(seconds: 6));
-      var dec = await doGet('verify/$transId', headers: headers());
+      var dec = await doPost('verify', {'client': this.clientId, 'reference': transId}, headers: headers());
       if (dec['transactionStatus'] == 'Completed') {
         return {'success': true, 'message': 'Payment Received. Thank you'};
       } else if (dec['transactionStatus'] == 'Failed') {
@@ -688,7 +691,7 @@ class HPay {
                         ),
                       ),
                     ],
-                    controlsBuilder: (BuildContext context, {VoidCallback? onStepContinue, VoidCallback? onStepCancel}) {
+                    controlsBuilder: (BuildContext context, ControlsDetails details) {
                       return Container();
                     },
                   )));
@@ -903,7 +906,7 @@ class HPay {
                         ),
                       ),
                     ],
-                    controlsBuilder: (BuildContext context, {VoidCallback? onStepContinue, VoidCallback? onStepCancel}) {
+                    controlsBuilder: (BuildContext context, ControlsDetails details) {
                       return Container();
                     },
                   )));

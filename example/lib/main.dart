@@ -35,20 +35,29 @@ class _MyHomePageState extends State<MyHomePage> {
     currency: 'GHS',
     buttonColors: Colors.black,
     source: 'MyFancyApp',
+    callback: 'https://kampusbuy.com/pay/hook'
   );
 
   void doProcessPayment() async {
-    var paymentResponse = await hp.processPayment(context: context, amount: 1.00, customerNumber: '2330000000');
+    var paymentResponse = await hp.processPayment(
+        context: context,
+        amount: 1.00,
+        customerNumber: '233249713683');
     print(paymentResponse.toString());
   }
 
   void doDeposit() async {
-    var paymentResponse = await hp.processPayment(context: context, amount: 1.00, customerNumber: '2330000000', purpose: 'deposit');
+    var paymentResponse = await hp.processPayment(
+        context: context,
+        amount: 1.00,
+        customerNumber: '2330000000',
+        purpose: 'deposit');
     print(paymentResponse.toString());
   }
 
   void doWithdraw() async {
-    var withdrawMoneyResponse = await hp.withdraw(context: context, amount: 1.00, customerNumber: '2330000000');
+    var withdrawMoneyResponse = await hp.withdraw(
+        context: context, amount: 1.00, customerNumber: '2330000000');
     print(withdrawMoneyResponse.toString());
   }
 
@@ -57,7 +66,8 @@ class _MyHomePageState extends State<MyHomePage> {
       new MoneyRecipient(customerNumber: '2330000000', amount: 1.00),
       new MoneyRecipient(customerNumber: '2330000001', amount: 2.00),
     ];
-    var sendMoneyResponse = await hp.sendMoney(context: context, recipients: clients);
+    var sendMoneyResponse =
+        await hp.sendMoney(context: context, recipients: clients);
     print(sendMoneyResponse.toString());
   }
 
@@ -74,7 +84,9 @@ class _MyHomePageState extends State<MyHomePage> {
             SizedBox(
               width: 200,
               child: TextButton(
-                  style: ButtonStyle(backgroundColor: MaterialStateProperty.all(ThemeData.light().primaryColor)),
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(
+                          ThemeData.light().primaryColor)),
                   onPressed: sendMoney,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -90,7 +102,9 @@ class _MyHomePageState extends State<MyHomePage> {
             SizedBox(
               width: 200,
               child: TextButton(
-                  style: ButtonStyle(backgroundColor: MaterialStateProperty.all(ThemeData.light().primaryColor)),
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(
+                          ThemeData.light().primaryColor)),
                   onPressed: doProcessPayment,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -106,7 +120,9 @@ class _MyHomePageState extends State<MyHomePage> {
             SizedBox(
               width: 200,
               child: TextButton(
-                  style: ButtonStyle(backgroundColor: MaterialStateProperty.all(ThemeData.light().primaryColor)),
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(
+                          ThemeData.light().primaryColor)),
                   onPressed: doWithdraw,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -122,7 +138,9 @@ class _MyHomePageState extends State<MyHomePage> {
             SizedBox(
               width: 200,
               child: TextButton(
-                  style: ButtonStyle(backgroundColor: MaterialStateProperty.all(ThemeData.light().primaryColor)),
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(
+                          ThemeData.light().primaryColor)),
                   onPressed: doDeposit,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
