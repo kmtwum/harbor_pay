@@ -30,11 +30,10 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   HPay hp = new HPay(
-    clientId: '469',
-    currency: 'GHS',
+    clientId: '123456',
     buttonColors: Colors.black,
     bottomSheetBackgroundColor: Colors.white,
-    callback: 'https://kampusbuy.com/pay/hook'
+    callback: 'https://'
   );
 
   void doProcessPayment() async {

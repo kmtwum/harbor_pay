@@ -1,4 +1,10 @@
-## [0.0.9] - 2021-04-14
+## [1.0.1] - 2023-10-21
+- Revamped to use default base URL
+
+## [1.0.0] - 2022-08-11
+- Revamped to only accept payments using mobile money
+
+- ## [0.0.9] - 2021-04-14
 - Relaxed customerName requirement for processing payments
 
 ## [0.0.8] - 2021-04-13
