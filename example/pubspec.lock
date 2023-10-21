@@ -66,7 +66,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.0.9"
+    version: "1.0.1"
   http:
     dependency: transitive
     description:
@@ -177,13 +177,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.2"
-  webview_flutter:
-    dependency: transitive
-    description:
-      name: webview_flutter
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.0.2"
 sdks:
   dart: ">=2.17.0-0 <3.0.0"
-  flutter: ">=1.22.0"
+  flutter: ">=1.17.0"
